@@ -33,7 +33,7 @@ class UIComponents:
                 text-align: center;
                 font-weight: bold;
                 text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-                margin-bottom: 2rem;
+                margin-bottom: 3rem;
                 padding: 2rem 0;
                 border-radius: 20px;
             }
