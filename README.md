@@ -10,7 +10,6 @@ A web application that generates personalized bedtime stories for children based
 - Enriches stories with weather, time, and fun facts
 - Simple, interactive Streamlit UI
 - Emoji illustrations for extra fun
-- No image generation (text and emoji only)
 
 ---
 
@@ -80,17 +79,13 @@ Story_Gen/
 
 ---
 
-## Deploying on Hugging Face Spaces
+## Deploying on Streamlit Cloud
 
-1. **Push your code to a public GitHub repository.**
-2. **Create a new Space:**
-   - Go to [Hugging Face Spaces](https://huggingface.co/spaces)
-   - Click "Create new Space"
-   - Choose "Streamlit" as the SDK
-   - Link your GitHub repo or upload your code
-3. **Set the `HUGGINGFACEHUB_API_TOKEN` as a secret in the Space settings** (or enter it in the app sidebar at runtime).
-4. **Click "Deploy".**
-5. **Access your app via the provided Hugging Face Spaces URL.**
+1. Push your code to a public GitHub repository.
+2. Go to [Streamlit Cloud](https://streamlit.io/cloud) and sign in with GitHub.
+3. Click "New app", select your repo, branch, and main file (e.g., app.py).
+4. Click "Deploy". Your app will be live at a public URL!
+5. (Optional) Add secrets like API tokens in the app's "Secrets" tab.
 
 ---
 
