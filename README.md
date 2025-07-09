@@ -89,5 +89,18 @@ Story_Gen/
 
 ---
 
+## App Images
+
+![img 1](screenshots/bsg_1.png)
+
+![img 2](screenshots/bsg_2.png)
+
+![img 3](screenshots/bsg_3.png)
+
+![img 4](screenshots/bsg_4.png)
+
+---
+
+
 ## License
 This project is for educational and personal use. See `LICENSE` for more details. 
