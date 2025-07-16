@@ -13,7 +13,9 @@ class UIComponents:
     
     @staticmethod
     def setup_page_config():
-        """Setup Streamlit page configuration."""
+        """
+        Setup Streamlit page configuration (title, icon, layout, sidebar state).
+        """
         st.set_page_config(
             page_title="Bedtime Story Generator",
             page_icon="🌙",
@@ -23,7 +25,9 @@ class UIComponents:
     
     @staticmethod
     def load_custom_css():
-        """Load custom CSS for child-friendly design."""
+        """
+        Load custom CSS for a child-friendly, visually appealing design.
+        """
         st.markdown("""
         <style>
             .main-header {
@@ -76,12 +80,16 @@ class UIComponents:
     
     @staticmethod
     def display_header():
-        """Display the main header."""
+        """
+        Display the main header for the app using custom CSS.
+        """
         st.markdown('<h1 class="main-header">🌙 Bedtime Story Generator ✨</h1>', unsafe_allow_html=True)
     
     @staticmethod
     def display_welcome():
-        """Display welcome message when no preferences are set."""
+        """
+        Display a welcome message and instructions when no preferences are set.
+        """
         col1, col2, col3 = st.columns([1, 2, 1])
         
         with col2:
@@ -107,15 +115,19 @@ class UIComponents:
     
     @staticmethod
     def collect_preferences() -> ChildPreferences:
-        """Collect child preferences in the sidebar."""
+        """
+        Collect child preferences in the sidebar using various Streamlit widgets.
+        Returns:
+            ChildPreferences: An object containing all the child's preferences, or None if required fields are missing.
+        """
         
-        # Child's name
+        # Child's name input
         child_name = st.text_input("Child's Name:", placeholder="Enter name...")
         
-        # Age
+        # Age slider
         age = st.slider("Age:", 2, 12, 6)
         
-        # Mood selection
+        # Mood selection with emojis
         st.markdown("### 😊 How is the child feeling today?")
         mood_options = {
             "😊 Happy": "happy and cheerful",
@@ -129,7 +141,7 @@ class UIComponents:
         mood = st.selectbox("Select mood:", list(mood_options.keys()))
         mood_value = mood_options[mood]
         
-        # Interests
+        # Interests multi-select
         st.markdown("### 🎯 What does the child love?")
         interest_options = [
             "🐾 Animals", "🚀 Space", "👑 Princesses", "🦸 Superheroes", 
@@ -143,7 +155,7 @@ class UIComponents:
             default=["🐾 Animals", "⭐ Stars"]
         )
         
-        # Story length
+        # Story length selection
         st.markdown("### ⏰ Story Length")
         story_length = st.selectbox(
             "How long should the story be?",
@@ -151,16 +163,16 @@ class UIComponents:
             format_func=lambda x: {"short": "Short (5 min)", "medium": "Medium (10 min)", "long": "Long (15 min)"}[x]
         )
         
-        # Favorite animal
+        # Favorite animal input
         favorite_animal = st.text_input("Favorite Animal:", placeholder="e.g., elephant, dragon, unicorn...")
         
-        # Favorite color
+        # Favorite color selection
         favorite_color = st.selectbox(
             "Favorite Color:",
             ["Pink", "Blue", "Purple", "Green", "Yellow", "Orange", "Red", "Rainbow"]
         )
         
-        # Generate button
+        # Generate button - only returns preferences if all required fields are filled
         if st.button("✨ Generate Magical Story ✨", type="primary"):
             if child_name and interests and favorite_animal:
                 preferences = ChildPreferences(
@@ -180,9 +192,14 @@ class UIComponents:
     
     @staticmethod
     def display_story_section(story_generator, preferences: ChildPreferences):
-        """Display the story generation and display section."""
+        """
+        Display the story generation and display section, including the button to generate a story and the resulting story output.
+        Args:
+            story_generator: The StoryGenerator instance.
+            preferences (ChildPreferences): The child's preferences.
+        """
         
-        # Story generation
+        # If a story hasn't been generated yet, show the button to generate one
         if not st.session_state.get('story_generated', False):
             st.markdown("### 🎭 Ready to Create Magic?")
             
@@ -194,41 +211,16 @@ class UIComponents:
                         import time
                         time.sleep(2)
                         
-                        # Generate the story
+                        # Generate the story using the story generator
                         story = story_generator.generate_story(preferences)
-                        
                         st.session_state.current_story = story
                         st.session_state.story_generated = True
-                        st.rerun()
-        
-        # Display generated story
-        if st.session_state.get('story_generated', False):
-            st.markdown("### 📖 Your Magical Story")
+                        st.experimental_rerun()
+        else:
+            # If a story has been generated, display it in a styled box
+            st.markdown('<div class="story-box">' + st.session_state.current_story + '</div>', unsafe_allow_html=True)
             
-            # Story display
-            st.markdown(f"""
-            <div class="story-box">
-                {st.session_state.current_story}
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Action buttons
-            col1, col2, col3 = st.columns([1, 1, 1])
-            
-            with col1:
-                if st.button("🔄 Generate New Story"):
-                    st.session_state.story_generated = False
-                    st.rerun()
-            
-            with col2:
-                if st.button("💾 Save Story"):
-                    st.success("Story saved! (Feature coming soon)")
-            
-            with col3:
-                if st.button("📤 Share Story"):
-                    st.info("Share feature coming soon!")
-            
-            # Story details
+            # Show story details in an expandable section
             with st.expander("📋 Story Details"):
                 st.write(f"**Child:** {preferences.name} (Age: {preferences.age})")
                 st.write(f"**Mood:** {preferences.mood}")

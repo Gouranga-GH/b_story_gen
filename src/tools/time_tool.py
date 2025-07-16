@@ -6,13 +6,20 @@ import datetime
 from ..models import TimeInfo
 
 class TimeTool:
-    """Tool to get current time and date information."""
+    """
+    Tool to get current time and date information for story context.
+    Determines the current season, time of day, and whether it's bedtime.
+    """
     
     def get_time_info(self) -> TimeInfo:
-        """Get current time, date, and season information."""
-        now = datetime.datetime.now()
+        """
+        Get current time, date, season, time of day, and bedtime status.
+        Returns:
+            TimeInfo: Dataclass with all time-related context for the story.
+        """
+        now = datetime.datetime.now()  # Get the current date and time
         
-        # Determine season
+        # Determine the current season based on the month
         month = now.month
         if month in [12, 1, 2]:
             season = "winter"
@@ -23,7 +30,7 @@ class TimeTool:
         else:
             season = "autumn"
         
-        # Determine time of day
+        # Determine the time of day based on the hour
         hour = now.hour
         if 5 <= hour < 12:
             time_of_day = "morning"
@@ -34,10 +41,11 @@ class TimeTool:
         else:
             time_of_day = "night"
         
+        # Determine if it's bedtime (between 7pm and 10pm)
         return TimeInfo(
-            time=now.strftime("%H:%M"),
-            date=now.strftime("%B %d, %Y"),
-            season=season,
-            time_of_day=time_of_day,
-            is_bedtime=19 <= hour <= 22
+            time=now.strftime("%H:%M"),                # e.g., '21:15'
+            date=now.strftime("%B %d, %Y"),            # e.g., 'April 27, 2024'
+            season=season,                              # e.g., 'spring'
+            time_of_day=time_of_day,                    # e.g., 'evening'
+            is_bedtime=19 <= hour <= 22                 # True if between 7pm and 10pm
         ) 

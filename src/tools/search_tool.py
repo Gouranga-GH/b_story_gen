@@ -6,9 +6,15 @@ import random
 from typing import Dict, List
 
 class SearchTool:
-    """Tool to search for educational content."""
+    """
+    Tool to search for educational content.
+    Provides fun and interesting facts for various story topics (animals, space, nature, etc.).
+    Used to enrich stories with educational tidbits based on the child's interests.
+    """
     
     def __init__(self):
+        # A dictionary mapping topic categories to lists of fun facts.
+        # This acts as a simple in-memory database for quick fact lookup.
         self.facts_database = {
             'animals': [
                 "Elephants are the only mammals that can't jump!",
@@ -93,7 +99,15 @@ class SearchTool:
         }
     
     def search_facts(self, topic: str) -> str:
-        """Search for interesting facts about a topic."""
+        """
+        Search for interesting facts about a topic.
+        Tries to match the topic to a category in the database and returns a random fact.
+        If no match is found, returns a default positive fact.
+        Args:
+            topic (str): The topic or interest to search for (e.g., 'animals', 'space').
+        Returns:
+            str: A fun fact related to the topic, or a default fact if not found.
+        """
         for category, facts in self.facts_database.items():
             if category in topic.lower():
                 return random.choice(facts)
@@ -109,7 +123,14 @@ class SearchTool:
         return random.choice(default_facts)
     
     def get_facts_for_interests(self, interests: List[str]) -> List[str]:
-        """Get facts for multiple interests."""
+        """
+        Get facts for multiple interests.
+        Loops through a list of interests and collects a fact for each.
+        Args:
+            interests (List[str]): List of topics/interests.
+        Returns:
+            List[str]: List of fun facts, one for each interest.
+        """
         facts = []
         for interest in interests:
             fact = self.search_facts(interest)

@@ -6,33 +6,39 @@ import random
 import time
 from typing import Dict, List, Optional
 
+# Import LangChain components for LLMs, tools, and agent orchestration
 from langchain.llms import HuggingFaceHub
 from langchain.tools import Tool
 from langchain.agents import initialize_agent, AgentType
 
+# Import local models, tools, prompts, and utilities
 from .models import ChildPreferences, WeatherInfo, TimeInfo, StoryContext
 from .tools import WeatherTool, TimeTool, SearchTool
 from .prompts import StoryPrompts
 from .utils import ContentFilter, StoryFormatter
 
 class StoryGenerator:
-    """Main story generation class using LangChain."""
+    """Main story generation class using LangChain and Hugging Face LLMs."""
     
     def __init__(self, huggingfacehub_api_token: str):
-        # Initialize with a free Hugging Face model
-        # Note: In production, you'd use your Hugging Face API token
+        """
+        Initialize the story generator with a Hugging Face LLM and contextual tools.
+        Args:
+            huggingfacehub_api_token (str): API token for Hugging Face Hub.
+        """
+        # Set up the language model (DialoGPT-medium) from Hugging Face
         self.llm = HuggingFaceHub(
             repo_id="microsoft/DialoGPT-medium",
             model_kwargs={"temperature": 0.8, "max_length": 500},
             huggingfacehub_api_token=huggingfacehub_api_token
         )
         
-        # Initialize tools
+        # Initialize context tools for weather, time, and educational facts
         self.weather_tool = WeatherTool()
         self.time_tool = TimeTool()
         self.search_tool = SearchTool()
         
-        # Create LangChain tools
+        # Wrap tools as LangChain Tool objects for agent use
         self.tools = [
             Tool(
                 name="weather_tool",
@@ -51,7 +57,7 @@ class StoryGenerator:
             )
         ]
         
-        # Initialize agent
+        # Initialize a LangChain agent that can use the above tools
         self.agent = initialize_agent(
             self.tools,
             self.llm,
@@ -60,18 +66,24 @@ class StoryGenerator:
         )
     
     def generate_story(self, preferences: ChildPreferences) -> str:
-        """Generate a personalized bedtime story."""
+        """
+        Generate a personalized bedtime story based on child preferences and real-world context.
+        Args:
+            preferences (ChildPreferences): The child's preferences and story settings.
+        Returns:
+            str: The final, formatted, and filtered story.
+        """
         
-        # Get context information
+        # Gather real-world context for the story
         weather_info = self.weather_tool.get_weather()
         time_info = self.time_tool.get_time_info()
         
-        # Get educational fact based on interests
+        # Get an educational fact related to one of the child's interests
         educational_fact = self.search_tool.search_facts(
             random.choice(preferences.interests)
         )
         
-        # Create story context
+        # Bundle all context into a StoryContext object
         context = StoryContext(
             preferences=preferences,
             weather=weather_info,
@@ -80,34 +92,45 @@ class StoryGenerator:
         )
         
         try:
-            # Generate story using LangChain
+            # Create a prompt for the LLM using all gathered context
             story_prompt = StoryPrompts.create_story_prompt(
                 preferences, weather_info, time_info, educational_fact
             )
+            # Use the agent (with tools) to generate the story
             response = self.agent.run(story_prompt)
             
-            # Format and filter the story
+            # Format the story for readability and personalization
             formatted_story = StoryFormatter.format_story(response, preferences.name)
+            # Filter the story for safety and appropriateness
             filtered_story = ContentFilter.filter_content(formatted_story)
+            # Simplify language based on the child's age
             simplified_story = ContentFilter.simplify_language(filtered_story, preferences.age)
             
-            # Add illustrations
+            # Optionally add illustrations (e.g., emojis or text art)
             final_story = StoryFormatter.add_illustrations(simplified_story)
             
             return final_story
             
         except Exception as e:
+            # If anything fails, print the error and generate a fallback story
             print(f"Story generation error: {e}")
-            # Generate fallback story
             return self._generate_fallback_story(context)
     
     def _generate_fallback_story(self, context: StoryContext) -> str:
-        """Generate a fallback story if the main generation fails."""
+        """
+        Generate a fallback story using templates if the main generation fails.
+        Args:
+            context (StoryContext): All context information for the story.
+        Returns:
+            str: The fallback story, formatted and filtered.
+        """
         
+        # Get a list of fallback story templates
         templates = StoryPrompts.get_fallback_story_templates()
+        # Randomly select a template
         template = random.choice(templates)
         
-        # Fill in the template
+        # Fill in the template with context values
         story = template.format(
             name=context.preferences.name,
             age=context.preferences.age,
@@ -121,7 +144,7 @@ class StoryGenerator:
             fact=context.educational_fact
         )
         
-        # Format the fallback story
+        # Format, filter, and simplify the fallback story
         formatted_story = StoryFormatter.format_story(story, context.preferences.name)
         filtered_story = ContentFilter.filter_content(formatted_story)
         simplified_story = ContentFilter.simplify_language(filtered_story, context.preferences.age)
@@ -130,7 +153,13 @@ class StoryGenerator:
         return final_story
     
     def get_story_context(self, preferences: ChildPreferences) -> StoryContext:
-        """Get all context information for story generation."""
+        """
+        Gather all context information (weather, time, fact) for a given set of preferences.
+        Args:
+            preferences (ChildPreferences): The child's preferences and story settings.
+        Returns:
+            StoryContext: The complete context for story generation.
+        """
         weather_info = self.weather_tool.get_weather()
         time_info = self.time_tool.get_time_info()
         educational_fact = self.search_tool.search_facts(
